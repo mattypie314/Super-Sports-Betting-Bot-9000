@@ -1,0 +1,189 @@
+:root {
+  --bg: #10140f;
+  --panel: #181d17;
+  --ink: #e7eadf;
+  --muted: #9aa393;
+  --line: #2a3228;
+  --sports: #d47a6a;
+  --yes: #8fce7a;
+  --no: #e0897a;
+  --gold: #e2b15a;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  font-family: "IBM Plex Sans", sans-serif;
+  background:
+    radial-gradient(1200px 500px at 10% -10%, #2a1d1a 0%, transparent 55%),
+    var(--bg);
+  color: var(--ink);
+}
+
+.frame {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 20px 64px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: end;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 18px;
+}
+
+.kicker {
+  margin: 0 0 6px;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+h1 { margin: 0; font-size: 34px; letter-spacing: -0.03em; }
+h2 {
+  margin: 28px 0 12px;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.top-meta {
+  text-align: right;
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  max-width: 360px;
+}
+
+.desk {
+  display: grid;
+  grid-template-columns: 160px 220px 1fr auto;
+  gap: 14px;
+  align-items: end;
+  margin-top: 22px;
+}
+
+.field span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+select, textarea, button {
+  font: inherit;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+}
+
+.add-row { display: flex; gap: 8px; }
+.add-row select { flex: 1; }
+
+button {
+  padding: 10px 16px;
+  cursor: pointer;
+  background: #2a211c;
+  border-color: #4a332c;
+}
+
+button:hover { border-color: var(--sports); }
+button[disabled] { opacity: 0.5; cursor: wait; }
+
+#run {
+  background: var(--sports);
+  color: #1a100e;
+  font-weight: 600;
+  border: 0;
+  min-height: 42px;
+}
+
+.note {
+  margin-top: 16px;
+  padding: 10px 12px;
+  border: 1px solid #4a332c;
+  border-radius: 8px;
+  color: var(--gold);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.card .rank {
+  color: var(--sports);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+}
+
+.card h3 { margin: 6px 0 8px; font-size: 18px; }
+.card .sel { color: var(--yes); font-weight: 600; }
+.card .odds { color: var(--gold); font-family: "IBM Plex Mono", monospace; }
+.card p { margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.card ul { margin: 8px 0 0; padding-left: 18px; color: var(--ink); }
+.card li { margin: 4px 0; font-size: 14px; }
+.empty { color: var(--muted); padding: 8px 0; }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 500; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+.disclaimer { margin-top: 28px; color: var(--muted); font-size: 12px; }
+
+.trade-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin-top: 18px;
+  padding: 12px 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 14px;
+}
+.trade-bar input[type="number"] {
+  width: 80px;
+  margin-left: 6px;
+  padding: 6px 8px;
+  background: #10140f;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.check { display: flex; gap: 6px; align-items: center; }
+.live-btn {
+  margin-top: 10px;
+  background: #2a211c;
+  color: var(--gold);
+}
+#account { color: var(--muted); font-family: "IBM Plex Mono", monospace; font-size: 12px; }
+
+@media (max-width: 860px) {
+  .desk { grid-template-columns: 1fr; }
+  .top { flex-direction: column; align-items: start; }
+  .top-meta { text-align: left; }
+}

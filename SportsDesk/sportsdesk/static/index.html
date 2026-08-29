@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SportsDesk · Kalshi</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="frame">
+    <header class="top">
+      <div>
+        <p class="kicker">Kalshi sports desk</p>
+        <h1>SportsDesk</h1>
+      </div>
+      <div class="top-meta" id="meta">Kalshi contracts. Prompt it, then place paper or live.</div>
+    </header>
+
+    <form id="desk" class="desk">
+      <label class="field sport-field">
+        <span>Sport</span>
+        <select id="sport" name="sport"></select>
+      </label>
+      <label class="field add-field">
+        <span>Add sport</span>
+        <div class="add-row">
+          <select id="add-sport"></select>
+          <button type="button" id="add-btn">Add</button>
+        </div>
+      </label>
+      <label class="field prompt-field">
+        <span>Prompt</span>
+        <textarea id="prompt" name="prompt" rows="3"></textarea>
+      </label>
+      <button type="submit" id="run">Get board</button>
+    </form>
+
+    <div class="trade-bar">
+      <label>Stake $ <input id="stake" type="number" min="0.25" step="0.25" value="1" /></label>
+      <label class="check"><input id="live" type="checkbox" /> Live Kalshi cash</label>
+      <label class="check"><input id="confirm" type="checkbox" /> I confirm live</label>
+      <span id="account">Checking Kalshi…</span>
+    </div>
+
+    <p class="note" id="note" hidden></p>
+    <p class="note" id="bet-note" hidden></p>
+
+    <section>
+      <h2>Best 3 overall</h2>
+      <div class="cards" id="picks"></div>
+    </section>
+
+    <section>
+      <h2>Same-game stacks</h2>
+      <div class="cards" id="parlays"></div>
+    </section>
+
+    <section>
+      <h2>YRFI / NRFI MLB</h2>
+      <div class="cards" id="yrfi"></div>
+    </section>
+
+    <section>
+      <h2>Kalshi slate</h2>
+      <div class="table-wrap">
+        <table id="slate">
+          <thead>
+            <tr><th>Event</th><th>Contract</th><th>Bid</th><th>Ask</th><th>Ask ¢</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="disclaimer" id="disclaimer">Kalshi only. Stacks buy each leg as its own contract. Live spends real cash.</p>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
