@@ -10,6 +10,9 @@ from typing import Any
 import httpx
 
 from sportsdesk.auth import load_private_key, sign_path_from_url, signed_headers
+from sportsdesk.envload import load_env
+
+load_env()
 
 DEFAULT_BASE = "https://api.elections.kalshi.com/trade-api/v2"
 

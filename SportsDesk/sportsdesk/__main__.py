@@ -4,6 +4,10 @@ import os
 
 import uvicorn
 
+from sportsdesk.envload import load_env
+
+load_env()
+
 
 def main() -> None:
     port = int(os.environ.get("SPORTSDESK_PORT", "8765"))
