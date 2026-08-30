@@ -1,4 +1,7 @@
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { repoRoot } from './env.js';
 import { findSport, toGame } from './sports.js';
 import { buildBuyOrder } from './odds.js';
 
@@ -11,10 +14,18 @@ function host() {
 }
 
 export function isConfigured() {
-  return Boolean(process.env.KALSHI_API_KEY_ID && process.env.KALSHI_PRIVATE_KEY);
+  return Boolean(
+    process.env.KALSHI_API_KEY_ID &&
+      (process.env.KALSHI_PRIVATE_KEY || process.env.KALSHI_PRIVATE_KEY_PATH),
+  );
 }
 
 function privateKeyPem() {
+  const keyPath = process.env.KALSHI_PRIVATE_KEY_PATH;
+  if (keyPath) {
+    const resolved = path.isAbsolute(keyPath) ? keyPath : path.join(repoRoot(), keyPath);
+    return fs.readFileSync(resolved, 'utf8');
+  }
   const raw = process.env.KALSHI_PRIVATE_KEY || '';
   return raw.includes('\\n') ? raw.replace(/\\n/g, '\n') : raw;
 }

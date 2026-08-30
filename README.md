@@ -8,11 +8,15 @@ Kalshi sportsbook: live moneyline boards, cash balance, and Quick / Limit orders
 npm install
 ```
 
-To show your cash balance and place orders, set:
+To show your cash balance and place orders, put a gitignored `.env` in the repo root:
 
-- `KALSHI_API_KEY_ID` — API key ID from Kalshi → Account → API Keys
-- `KALSHI_PRIVATE_KEY` — the PEM private key (newlines may be stored as `\n`)
-- `KALSHI_ENV` — `prod` (default) or `demo`
+```
+KALSHI_API_KEY_ID=your-key-id
+KALSHI_PRIVATE_KEY_PATH=.kalshi.key
+KALSHI_ENV=prod
+```
+
+Keep the PEM in `.kalshi.key` (also gitignored). You can instead set `KALSHI_PRIVATE_KEY` to the PEM text. Never commit either file.
 
 The board still loads public Kalshi markets without keys.
 
