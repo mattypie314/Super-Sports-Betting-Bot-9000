@@ -1,52 +1,97 @@
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { calculateParlay } from './odds.js';
-import { listPicks, suggestParlay } from './picks.js';
+import { SPORTS } from './sports.js';
+import { getBalance, getGames, getPositions, isConfigured, placeOrder } from './kalshi.js';
+import { orderCost, parsePriceDollars } from './odds.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
+
+function sendError(res, err) {
+  const status = err.code === 'NOT_CONFIGURED' ? 503 : err.status || 400;
+  res.status(status).json({
+    error: err.message,
+    configured: isConfigured(),
+  });
+}
 
 export function createApp() {
   const app = express();
   app.use(express.json());
 
   app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', service: 'super-sports-betting-bot-9000' });
+    res.json({
+      status: 'ok',
+      service: 'super-sports-betting-bot-9000',
+      kalshi: isConfigured() ? 'connected' : 'needs_credentials',
+    });
   });
 
-  app.get('/api/picks', (req, res) => {
-    res.json({ picks: listPicks() });
+  app.get('/api/sports', (req, res) => {
+    res.json({ sports: SPORTS.map(({ id, label, category, icon }) => ({ id, label, category, icon })) });
   });
 
-  app.get('/api/suggested-parlay', (req, res) => {
-    const size = Number(req.query.size) || 3;
-    const legs = suggestParlay(size);
+  app.get('/api/games', async (req, res) => {
     try {
-      const parlay = calculateParlay(legs, Number(req.query.stake) || 10);
-      res.json({ legs, parlay });
+      const games = await getGames(req.query.sport || 'mlb');
+      res.json({ games });
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      sendError(res, err);
     }
   });
 
-  app.post('/api/parlay', (req, res) => {
-    const { legs, stake } = req.body ?? {};
+  app.get('/api/balance', async (req, res) => {
+    if (!isConfigured()) {
+      res.json({ configured: false, balanceDollars: null });
+      return;
+    }
     try {
-      const parlay = calculateParlay(legs, stake);
-      res.json({ parlay });
+      const balance = await getBalance();
+      res.json({ configured: true, ...balance });
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      sendError(res, err);
+    }
+  });
+
+  app.get('/api/positions', async (req, res) => {
+    if (!isConfigured()) {
+      res.json({ configured: false, positions: [] });
+      return;
+    }
+    try {
+      const positions = await getPositions();
+      res.json({ configured: true, positions });
+    } catch (err) {
+      sendError(res, err);
+    }
+  });
+
+  app.post('/api/order', async (req, res) => {
+    try {
+      const { ticker, side, count, price, orderType } = req.body ?? {};
+      const priceDollars = parsePriceDollars(price);
+      const result = await placeOrder({
+        ticker,
+        side,
+        count,
+        priceDollars,
+        orderType,
+      });
+      res.status(201).json({
+        order: result,
+        cost: orderCost(count, priceDollars),
+      });
+    } catch (err) {
+      sendError(res, err);
     }
   });
 
   app.use(express.static(path.join(__dirname, '..', 'public')));
-
   return app;
 }
 
-// Only start listening when run directly (not when imported by tests).
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const app = createApp();
   app.listen(PORT, HOST, () => {

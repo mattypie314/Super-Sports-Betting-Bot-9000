@@ -1,12 +1,6 @@
 # Super-Sports-Betting-Bot-9000
 
-Sports picks and parlay helper. A small Node.js + Express web app that serves a
-list of daily picks and a parlay builder that computes combined American odds,
-implied win probability, and payout.
-
-## Requirements
-
-- Node.js >= 20 (developed on Node 22)
+Kalshi sportsbook: live moneyline boards, cash balance, and Quick / Limit orders.
 
 ## Setup
 
@@ -14,19 +8,19 @@ implied win probability, and payout.
 npm install
 ```
 
+To show your cash balance and place orders, set:
+
+- `KALSHI_API_KEY_ID` — API key ID from Kalshi → Account → API Keys
+- `KALSHI_PRIVATE_KEY` — the PEM private key (newlines may be stored as `\n`)
+- `KALSHI_ENV` — `prod` (default) or `demo`
+
+The board still loads public Kalshi markets without keys.
+
 ## Run
 
 ```bash
-npm start        # production start on http://localhost:3000
-npm run dev      # dev mode with auto-reload (node --watch)
-```
-
-Then open http://localhost:3000. Set `PORT` / `HOST` env vars to override the
-defaults (`3000` / `0.0.0.0`).
-
-## Test
-
-```bash
+npm start        # http://localhost:3000
+npm run dev      # auto-reload
 npm test
 ```
 
@@ -34,22 +28,9 @@ npm test
 
 | Method | Route | Description |
 | --- | --- | --- |
-| GET | `/api/health` | Health check. |
-| GET | `/api/picks` | Today's picks with market implied probability and model edge. |
-| GET | `/api/suggested-parlay?size=3&stake=10` | Highest-edge parlay suggestion. |
-| POST | `/api/parlay` | Body `{ "legs": [{ "american": -110 }], "stake": 10 }` → combined parlay math. |
-
-## Project layout
-
-```
-src/odds.js      Pure odds conversion + parlay math (unit tested)
-src/picks.js     Sample picks model and edge-based parlay suggestion
-src/server.js    Express server + API + static file serving
-public/          Frontend (parlay builder UI)
-test/            Unit tests (node:test)
-```
-
-## Cloud Agent environment
-
-`.cursor/environment.json` installs dependencies with `npm ci` and runs the dev
-server (`npm run dev`) in a `dev-server` terminal on port 3000.
+| GET | `/api/health` | Health + Kalshi credential status |
+| GET | `/api/sports` | Board tabs |
+| GET | `/api/games?sport=mlb` | Open Kalshi moneyline games |
+| GET | `/api/balance` | Kalshi cash |
+| GET | `/api/positions` | Open positions |
+| POST | `/api/order` | `{ ticker, side: "yes"\|"no", count, price, orderType: "quick"\|"limit" }` |

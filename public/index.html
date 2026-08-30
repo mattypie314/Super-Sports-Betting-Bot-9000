@@ -3,53 +3,77 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Super Sports Betting Bot 9000</title>
+    <title>9000</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="topbar">
       <div class="brand">
-        <span class="logo">🎰</span>
-        <div>
-          <h1>Super Sports Betting Bot <span class="accent">9000</span></h1>
-          <p class="tagline">Sports picks &amp; parlay helper</p>
-        </div>
+        <span class="mark">9K</span>
+        <span class="name">9000</span>
       </div>
-      <button id="suggest-btn" class="btn btn-accent">Suggest best parlay</button>
+      <nav id="sports" class="sports" aria-label="Sports"></nav>
+      <div class="cash" id="cash" title="Kalshi cash">
+        <span class="cash-label">Cash</span>
+        <span class="cash-amt" id="cash-amt">—</span>
+      </div>
     </header>
 
-    <main class="layout">
-      <section class="panel">
-        <h2>Today's picks</h2>
-        <p class="hint">Click a pick to add it to your slip. Edge = model confidence − market implied probability.</p>
-        <div id="picks" class="picks"></div>
+    <main class="shell">
+      <section class="board">
+        <div class="feed-head">
+          <h1>Happening now</h1>
+          <p id="feed-meta" class="muted"></p>
+        </div>
+        <div id="games" class="games"></div>
+        <p id="feed-empty" class="empty hidden">No open games in this sport right now.</p>
       </section>
 
-      <section class="panel slip">
-        <h2>Bet slip</h2>
-        <div id="slip" class="slip-list">
-          <p class="empty">No legs yet — add picks from the left.</p>
+      <aside class="ticket" id="ticket">
+        <div class="tabs">
+          <button class="tab on" data-tab="markets">Markets</button>
+          <button class="tab" data-tab="positions">Positions</button>
         </div>
 
-        <div class="stake-row">
-          <label for="stake">Stake ($)</label>
-          <input id="stake" type="number" min="1" step="1" value="10" />
-        </div>
+        <div id="panel-markets">
+          <p id="ticket-event" class="ticket-event muted">Pick a price to trade</p>
+          <div id="market-rows" class="market-rows"></div>
 
-        <div id="result" class="result hidden">
-          <div class="result-grid">
-            <div><span class="k">Legs</span><span id="r-legs" class="v"></span></div>
-            <div><span class="k">Combined odds</span><span id="r-american" class="v"></span></div>
-            <div><span class="k">Decimal</span><span id="r-decimal" class="v"></span></div>
-            <div><span class="k">Implied win %</span><span id="r-prob" class="v"></span></div>
-            <div><span class="k">Payout</span><span id="r-payout" class="v big"></span></div>
-            <div><span class="k">Profit</span><span id="r-profit" class="v big accent"></span></div>
+          <div id="order" class="order hidden">
+            <div class="side-row">
+              <button id="side-yes" class="side yes on">Yes</button>
+              <button id="side-no" class="side no">No</button>
+            </div>
+            <div class="type-row">
+              <button id="type-quick" class="chip on">Quick</button>
+              <button id="type-limit" class="chip">Limit</button>
+            </div>
+            <label class="field">
+              <span>Contracts</span>
+              <input id="contracts" type="number" min="1" step="1" value="10" />
+            </label>
+            <label class="field">
+              <span>Price</span>
+              <div class="price-wrap">
+                <input id="price" type="number" min="1" max="99" step="1" />
+                <span class="suffix">¢</span>
+              </div>
+            </label>
+            <div class="summary">
+              <div><span class="k">Cost</span><span id="cost" class="v">$0.00</span></div>
+              <div><span class="k">To win</span><span id="payout" class="v">$0.00</span></div>
+            </div>
+            <button id="place" class="place">Place order</button>
+            <p id="order-msg" class="msg hidden"></p>
           </div>
         </div>
-        <p id="error" class="error hidden"></p>
-      </section>
+
+        <div id="panel-positions" class="hidden">
+          <div id="positions" class="positions"></div>
+        </div>
+      </aside>
     </main>
 
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>

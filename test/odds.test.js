@@ -1,45 +1,65 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  americanToDecimal,
-  decimalToAmerican,
-  impliedProbability,
-  calculateParlay,
+  dollarsToAmerican,
+  dollarsToPercentLabel,
+  parsePriceDollars,
+  buildBuyOrder,
+  orderCost,
 } from '../src/odds.js';
 
-test('americanToDecimal handles favorites and underdogs', () => {
-  assert.equal(americanToDecimal(100), 2);
-  assert.equal(americanToDecimal(-200), 1.5);
-  assert.equal(americanToDecimal(150), 2.5);
+test('dollarsToPercentLabel matches Kalshi pills', () => {
+  assert.equal(dollarsToPercentLabel(0.32), '32%');
+  assert.equal(dollarsToPercentLabel(0.69), '69%');
 });
 
-test('decimalToAmerican is the inverse of americanToDecimal', () => {
-  for (const odds of [-250, -110, 100, 120, 300]) {
-    assert.equal(decimalToAmerican(americanToDecimal(odds)), odds);
-  }
+test('parsePriceDollars accepts cents or dollars', () => {
+  assert.equal(parsePriceDollars(32), 0.32);
+  assert.equal(parsePriceDollars('47%'), 0.47);
+  assert.equal(parsePriceDollars('0.53'), 0.53);
 });
 
-test('impliedProbability is between 0 and 1', () => {
-  const p = impliedProbability(-110);
-  assert.ok(p > 0 && p < 1);
-  assert.ok(Math.abs(p - 0.5238) < 0.001);
+test('dollarsToAmerican converts a 63¢ favorite', () => {
+  assert.equal(dollarsToAmerican(0.63), -170);
 });
 
-test('calculateParlay multiplies decimal odds and computes payout', () => {
-  const parlay = calculateParlay(
-    [{ american: 100 }, { american: 100 }],
-    10,
+test('buildBuyOrder yes quick is an IOC bid', () => {
+  const order = buildBuyOrder({
+    ticker: 'KXMLBGAME-MIA',
+    side: 'yes',
+    count: 10,
+    priceDollars: 0.32,
+    orderType: 'quick',
+  });
+  assert.deepEqual(order, {
+    ticker: 'KXMLBGAME-MIA',
+    side: 'bid',
+    count: '10.00',
+    price: '0.3200',
+    time_in_force: 'immediate_or_cancel',
+    self_trade_prevention_type: 'taker_at_cross',
+  });
+});
+
+test('buildBuyOrder no limit is a GTC ask at 1-price', () => {
+  const order = buildBuyOrder({
+    ticker: 'KXMLBGAME-MIA',
+    side: 'no',
+    count: 5,
+    priceDollars: 0.68,
+    orderType: 'limit',
+  });
+  assert.equal(order.side, 'ask');
+  assert.equal(order.price, '0.3200');
+  assert.equal(order.time_in_force, 'good_till_canceled');
+});
+
+test('orderCost is contracts times price', () => {
+  assert.equal(orderCost(10, 0.32), 3.2);
+});
+
+test('buildBuyOrder rejects a bad price', () => {
+  assert.throws(() =>
+    buildBuyOrder({ ticker: 'X', side: 'yes', count: 1, priceDollars: 1, orderType: 'limit' }),
   );
-  // 2.0 * 2.0 = 4.0 decimal -> +300 american
-  assert.equal(parlay.decimal, 4);
-  assert.equal(parlay.american, 300);
-  assert.equal(parlay.payout, 40);
-  assert.equal(parlay.profit, 30);
-  assert.equal(parlay.legs, 2);
-});
-
-test('calculateParlay rejects empty legs and bad stake', () => {
-  assert.throws(() => calculateParlay([], 10));
-  assert.throws(() => calculateParlay([{ american: 100 }], -5));
-  assert.throws(() => calculateParlay([{ american: 0 }], 10));
 });
