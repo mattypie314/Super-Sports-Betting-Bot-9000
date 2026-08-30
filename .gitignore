@@ -1,4 +1,6 @@
 node_modules/
 npm-debug.log*
 .env
+.kalshi.key
+*.pem
 .DS_Store

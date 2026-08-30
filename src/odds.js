@@ -1,65 +1,68 @@
-// Pure helpers for converting and combining sports-betting odds.
-// American ("moneyline") odds are the source of truth throughout the app.
-
-/** Convert American odds (e.g. -150, +200) to a decimal multiplier (>= 1). */
-export function americanToDecimal(american) {
-  const odds = Number(american);
-  if (!Number.isFinite(odds) || odds === 0) {
-    throw new Error(`Invalid American odds: ${american}`);
+/** Convert a Kalshi contract price in dollars (0–1) to American odds. */
+export function dollarsToAmerican(dollars) {
+  const price = Number(dollars);
+  if (!Number.isFinite(price) || price <= 0 || price >= 1) {
+    throw new Error(`Invalid contract price: ${dollars}`);
   }
-  if (odds > 0) {
-    return 1 + odds / 100;
+  const decimal = 1 / price;
+  if (decimal >= 2) {
+    return Math.round((decimal - 1) * 100);
   }
-  return 1 + 100 / Math.abs(odds);
+  return Math.round(-100 / (decimal - 1));
 }
 
-/** Convert a decimal multiplier back to American odds (rounded to an integer). */
-export function decimalToAmerican(decimal) {
-  const d = Number(decimal);
-  if (!Number.isFinite(d) || d <= 1) {
-    throw new Error(`Invalid decimal odds: ${decimal}`);
-  }
-  if (d >= 2) {
-    return Math.round((d - 1) * 100);
-  }
-  return Math.round(-100 / (d - 1));
+/** Format a 0–1 dollar price as a Kalshi-style percent, e.g. 0.32 → "32%". */
+export function dollarsToPercentLabel(dollars) {
+  const price = Number(dollars);
+  if (!Number.isFinite(price) || price < 0) return '—';
+  return `${Math.round(price * 100)}%`;
 }
 
-/** Implied win probability (0..1) for the given American odds. */
-export function impliedProbability(american) {
-  return 1 / americanToDecimal(american);
+/** Parse a user percent (32 or "32%") or dollar string ("0.32") into dollars. */
+export function parsePriceDollars(input) {
+  if (typeof input === 'number' && Number.isFinite(input)) {
+    return input > 1 ? input / 100 : input;
+  }
+  const raw = String(input ?? '').trim().replace('%', '');
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) {
+    throw new Error(`Invalid price: ${input}`);
+  }
+  return n > 1 ? n / 100 : n;
 }
 
 /**
- * Combine a list of legs into a parlay.
- * @param {Array<{american:number}>} legs
- * @param {number} stake dollars risked
- * @returns {{decimal:number, american:number, impliedProbability:number, stake:number, payout:number, profit:number, legs:number}}
+ * Build the V2 event-order payload for a buy.
+ * Buying Yes = bid on the Yes book. Buying No = ask on the Yes book at 1 − noPrice.
  */
-export function calculateParlay(legs, stake = 10) {
-  if (!Array.isArray(legs) || legs.length === 0) {
-    throw new Error('A parlay needs at least one leg.');
+export function buildBuyOrder({ ticker, side, count, priceDollars, orderType }) {
+  const contracts = Number(count);
+  if (!Number.isFinite(contracts) || contracts <= 0) {
+    throw new Error('Contracts must be greater than 0.');
   }
-  const wager = Number(stake);
-  if (!Number.isFinite(wager) || wager <= 0) {
-    throw new Error(`Invalid stake: ${stake}`);
+  const price = Number(priceDollars);
+  if (!Number.isFinite(price) || price <= 0 || price >= 1) {
+    throw new Error('Price must be between 1¢ and 99¢.');
+  }
+  const buySide = String(side).toLowerCase();
+  if (buySide !== 'yes' && buySide !== 'no') {
+    throw new Error('Side must be yes or no.');
   }
 
-  const combinedDecimal = legs.reduce(
-    (acc, leg) => acc * americanToDecimal(leg.american),
-    1,
-  );
-
-  const payout = wager * combinedDecimal;
+  const isQuick = String(orderType).toLowerCase() === 'quick';
   return {
-    legs: legs.length,
-    decimal: round(combinedDecimal, 4),
-    american: decimalToAmerican(combinedDecimal),
-    impliedProbability: round(1 / combinedDecimal, 4),
-    stake: round(wager, 2),
-    payout: round(payout, 2),
-    profit: round(payout - wager, 2),
+    ticker,
+    side: buySide === 'yes' ? 'bid' : 'ask',
+    count: contracts.toFixed(2),
+    price: (buySide === 'yes' ? price : 1 - price).toFixed(4),
+    time_in_force: isQuick ? 'immediate_or_cancel' : 'good_till_canceled',
+    self_trade_prevention_type: 'taker_at_cross',
   };
+}
+
+/** Cost to buy `count` contracts at `priceDollars`. */
+export function orderCost(count, priceDollars) {
+  return round(Number(count) * Number(priceDollars), 2);
 }
 
 function round(value, places) {
